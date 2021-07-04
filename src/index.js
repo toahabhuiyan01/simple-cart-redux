@@ -3,10 +3,17 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { Provider } from 'react-redux';
+import Pdf from './pdf/Pdf';
+
+import store from './store/index';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      {/* <App /> */}
+      <Pdf />
+    </Provider>
   </React.StrictMode>,
   document.getElementById('root')
 );
