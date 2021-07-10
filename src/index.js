@@ -4,15 +4,15 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
-import Pdf from './pdf/Pdf';
+// import Pdf from './pdf/Pdf';
 
 import store from './store/index';
 
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      {/* <App /> */}
-      <Pdf />
+      <App />
+      {/* <Pdf /> */}
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')
