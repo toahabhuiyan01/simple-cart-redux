@@ -6,13 +6,19 @@ const cartSlice = createSlice({
     initialState: {
         items: [],
         totalQuantity: 0,
-        totalAmouont: 0
+        totalAmouont: 0,
+        changed: false
     },
     reducers: {
+        replaceCart(state, action) {
+            state.totalQuantity = action.payload.totalQuantity;
+            state.items = action.payload.items
+        },
         addItemToCart(state, action) {
             const newItem = action.payload;
             const existingItem = state.items.find(item => item.id === newItem.id);
             state.totalQuantity++;
+            state.changed = true;
             if (!existingItem) {
                 state.items.push({
                     id: newItem.id, 
@@ -31,15 +37,53 @@ const cartSlice = createSlice({
             const id = action.payload;
             const existingItem = state.items.find(item => item.id === id);
             state.totalQuantity--;
+            state.changed = true;
             if(existingItem.quantity === 1) {
                 state.items = state.items.filter(item => item.id !== id);
             }else {
                 existingItem.quantity--;
-                // existingItem.totalPrice = existingItem.totalPrice - existingItem.price;
+                existingItem.totalPrice = existingItem.totalPrice - existingItem.price;
             }
         }
     }
 });
+
+export const fetchCartData = () => {
+    return async dispatch => {
+        const fetchData = async () => {
+            const response = await fetch(
+                "https://fir-react-app-01-default-rtdb.firebaseio.com/cart.json"
+            )
+
+            if(!response.ok) {
+                throw new Error('Could not fetch cart data');
+            }
+
+            const data = await response.json();
+
+            return data;
+        }
+
+        try {
+            const cartData = await fetchData();
+            dispatch(
+                cartActions.replaceCart({
+                    items: cartData.items || [],
+                    totalQuantity: cartData.totalQuantity
+                })
+            )
+        }
+        catch(error) {
+            dispatch(
+                uiActions.showNotification({
+                    status: "error",
+                    title: "Error!",
+                    message: "Ferching cart data failed!",
+                })
+            )
+        }
+    }
+}
 
 export const sendCartData = (cart) => {
     return async (dispatch) => {
@@ -54,13 +98,15 @@ export const sendCartData = (cart) => {
         const sendRequest = async () => {
             const response = await fetch("https://fir-react-app-01-default-rtdb.firebaseio.com/cart.json", { 
                 method: "PUT", 
-                body: JSON.stringify(cart)
+                body: JSON.stringify({
+                    items: cart.items,
+                    totalQuantity: cart.totalQuantity
+                })
             })
     
             if(!response.ok) {
                 throw new Error("Sending cart data failed");
             }
-
         }
 
         try {
